@@ -3,7 +3,6 @@ use std::time::{Duration, Instant};
 
 /***************************************************************************************** */
 /* Things that must be in the both algorithms                                              */
-// Outputs:
 // - send_batch(node_id, operations_ids): Send batch to a node
 // - on_batch_received(): Receive a batch of operation ids
 // - ask_operations(node_id, operations_ids): Ask operations to a node, on_ask_received
