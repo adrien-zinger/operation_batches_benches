@@ -12,16 +12,16 @@ use std::time::{Duration, Instant};
 /* *************************************************************************************** */
 
 fn send_batch(_to_node_id: NodeId, _batch: OperationIds) {
-    std::thread::sleep(std::time::Duration::from_nanos(200))
+    todo!("add a counter here")
 }
 
 fn ask_operations(_to_node_id: NodeId, _op_ids: OperationIds) {
-    std::thread::sleep(std::time::Duration::from_nanos(200))
+    todo!("add a counter here")
 }
 
 fn send_operations(_to_node_id: NodeId, _op_ids: OperationMap) {
     // difer from the other algo
-    std::thread::sleep(std::time::Duration::from_nanos(200))
+    todo!("add a counter here")
 }
 
 ///```py
