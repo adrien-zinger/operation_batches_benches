@@ -1,2 +1,6 @@
 pub mod algo;
-mod types;
+pub mod types;
+
+
+pub use algo::*;
+pub use types::*;

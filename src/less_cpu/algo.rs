@@ -16,7 +16,7 @@ fn send_batch(_to_node_id: NodeId, _batch: OperationIds) {
 }
 
 fn ask_operations(_to_node_id: NodeId, _op_ids: OperationIds) {
-    todo!("add a counter here")
+    //todo!("add a counter here")
 }
 
 fn send_operations(_to_node_id: NodeId, _op_ids: OperationMap) {
@@ -41,7 +41,7 @@ fn send_operations(_to_node_id: NodeId, _op_ids: OperationMap) {
 ///        op_batch_buf.push(now+op_batch_proc_period, node_id, future_set)
 ///    ask ask_set to node_id
 ///```
-fn on_batch_received(
+pub fn on_batch_received(
     op_batch: OperationIds,
     node_id: NodeId,
     protocol: &mut FakeProtocol, /* self simulation */
@@ -68,7 +68,7 @@ fn on_batch_received(
         if wish.is_some() && wish.unwrap().0 > now {
             future_set.insert(op_id);
         } else {
-            ask_set.insert(op_id.clone());
+            ask_set.insert(op_id);
             protocol
                 .wanted_alias_asked_ops
                 .insert(op_id, (now, vec![node_id]));
@@ -87,7 +87,7 @@ fn on_batch_received(
 /* We can prune the buffer from the informations received in another future.
  */
 
-fn on_operation_received(
+pub fn on_operation_received(
     node_id: NodeId,
     operations: OperationMap,
     protocol: &mut FakeProtocol, /* self simulation */
@@ -107,7 +107,7 @@ fn on_operation_received(
     }
 }
 
-fn on_ask_received(
+pub fn on_ask_received(
     node_id: NodeId,
     op_ids: OperationIds,
     protocol: &mut FakeProtocol, /* self simulation */
@@ -127,10 +127,7 @@ fn on_ask_received(
 }
 
 /// Take the op_batch_buffer and reprocess on batch received
-fn on_send_loop(protocol: &mut FakeProtocol /* self simulation */) {
-    if protocol.op_batch_buffer.is_empty() {
-        return;
-    }
+pub fn on_send_loop(protocol: &mut FakeProtocol /* self simulation */) {
     while !protocol.op_batch_buffer.is_empty()
         && std::time::Instant::now() > protocol.op_batch_buffer.front().unwrap().0
     {
@@ -140,6 +137,6 @@ fn on_send_loop(protocol: &mut FakeProtocol /* self simulation */) {
 }
 
 /// Should be done in a loop each `asked_life_time` period
-fn on_prune_asked_lifetime_loop(protocol: &mut FakeProtocol /* self simulation */) {
+pub fn on_prune_asked_lifetime_loop(protocol: &mut FakeProtocol /* self simulation */) {
     protocol.wanted_alias_asked_ops.clear();
 }

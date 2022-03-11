@@ -33,7 +33,7 @@ pub struct FakeProtocol {
 
     /* Specific structure for the algorithm */
     /// Buffer for operations that we want later
-    pub op_batch_buffer: VecDeque<(Instant, NodeId, HashSet<NodeId>)>,
+    pub op_batch_buffer: VecDeque<(Instant, NodeId, HashSet<OperationId>)>,
     /* following should be in a configuration object */
     /// config max_batch_size
     pub max_batch_size: usize,
@@ -41,4 +41,28 @@ pub struct FakeProtocol {
     pub op_batch_proc_period: u64,
     /// config buffer capacity limit [FakeProtocol::op_batch_buffer]
     pub op_batch_buf_capacity: usize,
+}
+
+impl FakeProtocol {
+    pub fn new(
+        nodes_number: usize,
+        max_batch_size: usize,
+        op_batch_proc_period: u64,
+        op_batch_buf_capacity: usize
+    ) -> Self {
+
+        let mut node_infos = HashMap::default();
+        for k in 0..nodes_number {
+            node_infos.insert(k as u64, NodeInfo::default());
+        }
+        Self {
+            node_infos,
+            wanted_alias_asked_ops: WantOperations::default(),
+            received: OperationMap::default(),
+            op_batch_buffer: VecDeque::default(),
+            max_batch_size,
+            op_batch_proc_period,
+            op_batch_buf_capacity,
+        }
+    }
 }

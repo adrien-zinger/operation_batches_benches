@@ -10,21 +10,21 @@ use super::types::*;
 // - on_operation_received ...
 /* *************************************************************************************** */
 
-fn send_batch(_to_node_id: NodeId, _batch: OperationIds) {
+pub fn send_batch(_to_node_id: NodeId, _batch: OperationIds) {
     todo!("add a counter here")
 }
 
-fn ask_operations(_to_node_id: NodeId, _op_ids: OperationIds) {
+pub fn ask_operations(_to_node_id: NodeId, _op_ids: OperationIds) {
     todo!("add a counter here")
 }
 
-fn send_operations(_to_node_id: NodeId, _op_ids: AskedOperations) {
+pub fn send_operations(_to_node_id: NodeId, _op_ids: AskedOperations) {
     // difer from the other algo
     todo!("add a counter here")
 }
 
-fn on_batch_received(
-    op_batch: OperationBatch,
+pub fn on_batch_received(
+    op_batch: OperationIds,
     node_id: NodeId,
     protocol: &mut FakeProtocol, /* self simulation */
 ) {
@@ -40,14 +40,14 @@ fn on_batch_received(
             None => {
                 let mut info = NodeInfo::default();
                 info.known_op.insert(op_id);
-                protocol.node_infos.insert(node_id, info).unwrap();
+                protocol.node_infos.insert(node_id, info);
             }
         }
         protocol.wishlist.insert(op_id);
     }
 }
 
-fn on_asking_loop(protocol: &mut FakeProtocol /* self simulation */) {
+pub fn on_asking_loop(protocol: &mut FakeProtocol /* self simulation */) {
     for op_id in protocol.wishlist.iter() {
         if protocol.already_asked.contains(op_id) {
             // insert logic of retry after a while here
@@ -86,7 +86,7 @@ fn on_asking_loop(protocol: &mut FakeProtocol /* self simulation */) {
 */
 
 /// Notify operation and forward batches
-fn on_operation_received(
+pub fn on_operation_received(
     from_node_id: NodeId,
     asked_operation: AskedOperations,
     protocol: &mut FakeProtocol, /* self simulation */
@@ -120,7 +120,7 @@ fn on_operation_received(
 /*  It might be better to prune the node_infos in another futures that is also timed
 */
 
-fn on_ask_received(
+pub fn on_ask_received(
     node_id: NodeId,
     op_ids: OperationIds,
     protocol: &mut FakeProtocol, /* self simulation */
@@ -137,7 +137,7 @@ fn on_ask_received(
 }
 
 /// Call on `send` timer?
-fn on_send_operation_loop(protocol: &mut FakeProtocol) {
+pub fn on_send_operation_loop(protocol: &mut FakeProtocol) {
     for (node_id, node_info) in protocol.node_infos.iter() {
         let mut asked = AskedOperations::default();
         node_info

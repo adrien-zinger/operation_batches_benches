@@ -35,3 +35,20 @@ pub struct FakeProtocol {
     /// config maximum size of a batch (number of operations)
     pub max_batch_size: usize,
 }
+
+impl FakeProtocol {
+    pub fn new(nodes_number: usize, max_batch_size: usize) -> Self {
+        let mut node_infos = HashMap::default();
+        for k in 0..nodes_number {
+            node_infos.insert(k as u64, NodeInfo::default());
+        }
+        Self {
+            node_infos,
+            wishlist: OperationIds::default(),
+            wanted: WantOperations::default(),
+            already_asked: OperationIds::default(),
+            received: OperationMap::default(),
+            max_batch_size,
+        }
+    }
+}
