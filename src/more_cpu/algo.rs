@@ -138,12 +138,12 @@ pub fn on_ask_received(
 
 /// Call on `send` timer?
 pub fn on_send_operation_loop(protocol: &mut FakeProtocol) {
-    for (node_id, node_info) in protocol.node_infos.iter() {
+    for (node_id, node_info) in protocol.node_infos.iter_mut() {
         let mut asked = AskedOperations::default();
         node_info
             .wishlist
-            .clone()
-            .drain()
+            .iter()
+            .cloned()
             .take(protocol.max_batch_size)
             .for_each(|op_id| {
                 match protocol.received.get(&op_id) {
@@ -151,6 +151,9 @@ pub fn on_send_operation_loop(protocol: &mut FakeProtocol) {
                     None => asked.insert(op_id, None),
                 };
             });
+        asked.iter().for_each(|(id, _)| {
+            node_info.wishlist.remove(id);
+        });
         send_operations(*node_id, asked);
     }
 }
