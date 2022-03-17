@@ -9,10 +9,6 @@ pub type OperationIds = HashSet<OperationId>;
 pub type AskedOperations = std::collections::HashMap<OperationId, Option<Operation>>;
 /// Internal data structure describing the [Operation] we do want from which `NodeId`.
 pub type WantOperations = std::collections::HashMap<NodeId, HashSet<OperationId>>;
-/// Same as wanted operation but used to propagate `OperationId` through `NodeId`
-pub type OperationBatches = std::collections::HashMap<NodeId, Vec<OperationId>>;
-/// just a list of operation required
-pub type OperationBatch = Vec<OperationId>;
 
 #[derive(Default)]
 pub struct NodeInfo {
@@ -34,6 +30,9 @@ pub struct FakeProtocol {
 
     /// config maximum size of a batch (number of operations)
     pub max_batch_size: usize,
+
+    /// used for measurement, if true, it's the one we measure (default = true)
+    pub is_measured: bool,
 }
 
 impl FakeProtocol {
@@ -49,6 +48,7 @@ impl FakeProtocol {
             already_asked: OperationIds::default(),
             received: OperationMap::default(),
             max_batch_size,
+            is_measured: true,
         }
     }
 }

@@ -10,17 +10,29 @@ use super::types::*;
 // - on_operation_received ...
 /* *************************************************************************************** */
 
-pub fn send_batch(_to_node_id: NodeId, _batch: OperationIds) {
-    todo!("add a counter here")
+fn send_batch(_to_node_id: NodeId, _batch: OperationIds) {
+    //#[cfg(feature = "measurements")]
+    super::BATCH_SEND_QUEUE
+        .lock()
+        .unwrap()
+        .push((_to_node_id, _batch));
 }
 
-pub fn ask_operations(_to_node_id: NodeId, _op_ids: OperationIds) {
-    todo!("add a counter here")
+fn ask_operations(_to_node_id: NodeId, _op_ids: OperationIds) {
+    //#[cfg(feature = "measurements")]
+    super::ASK_BATCH_QUEUE
+        .lock()
+        .unwrap()
+        .push((_to_node_id, _op_ids));
 }
 
-pub fn send_operations(_to_node_id: NodeId, _op_ids: AskedOperations) {
+fn send_operations(_to_node_id: NodeId, _op_ids: AskedOperations) {
     // difer from the other algo
-    todo!("add a counter here")
+    //#[cfg(feature = "measurements")]
+    super::SEND_OPERATION
+        .lock()
+        .unwrap()
+        .push_back((_to_node_id, _op_ids));
 }
 
 pub fn on_batch_received(
@@ -47,6 +59,9 @@ pub fn on_batch_received(
     }
 }
 
+/// Demande une quantité limitée par noeud des operations
+/// qu'on a dans la wishlist. Ajoute dans une structure
+/// `wanted` ce dont on a besoin.
 pub fn on_asking_loop(protocol: &mut FakeProtocol /* self simulation */) {
     for op_id in protocol.wishlist.iter() {
         if protocol.already_asked.contains(op_id) {

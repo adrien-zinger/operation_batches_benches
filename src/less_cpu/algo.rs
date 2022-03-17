@@ -12,16 +12,28 @@ use std::time::{Duration, Instant};
 /* *************************************************************************************** */
 
 fn send_batch(_to_node_id: NodeId, _batch: OperationIds) {
-    todo!("add a counter here")
+    //#[cfg(feature = "measurements")]
+    super::BATCH_SEND_QUEUE
+        .lock()
+        .unwrap()
+        .push((_to_node_id, _batch));
 }
 
 fn ask_operations(_to_node_id: NodeId, _op_ids: OperationIds) {
-    //todo!("add a counter here")
+    //#[cfg(feature = "measurements")]
+    super::ASK_BATCH_QUEUE
+        .lock()
+        .unwrap()
+        .push_back((_to_node_id, _op_ids));
 }
 
+// difer from the other algo
 fn send_operations(_to_node_id: NodeId, _op_ids: OperationMap) {
-    // difer from the other algo
-    todo!("add a counter here")
+    //#[cfg(feature = "measurements")]
+    super::SEND_OPERATION
+        .lock()
+        .unwrap()
+        .push_back((_to_node_id, _op_ids));
 }
 
 ///```py
@@ -41,11 +53,16 @@ fn send_operations(_to_node_id: NodeId, _op_ids: OperationMap) {
 ///        op_batch_buf.push(now+op_batch_proc_period, node_id, future_set)
 ///    ask ask_set to node_id
 ///```
+///
+/// # Return
+///
+/// Operation asked in that call (usefull for measurement but not needed in
+/// the final implementation)
 pub fn on_batch_received(
     op_batch: OperationIds,
     node_id: NodeId,
     protocol: &mut FakeProtocol, /* self simulation */
-) {
+) -> OperationIds {
     let mut ask_set = OperationIds::with_capacity(op_batch.len());
     let mut future_set = OperationIds::with_capacity(op_batch.len());
     // exactitude isn't important, we want to have a now for that function call
@@ -81,7 +98,11 @@ pub fn on_batch_received(
             future_set,
         ));
     }
-    ask_operations(node_id, ask_set);
+    if protocol.is_measured {
+        // just for the measurement, remove that on the definitive implementation
+        ask_operations(node_id, ask_set.clone());
+    }
+    ask_set
 }
 
 /* We can prune the buffer from the informations received in another future.
@@ -103,7 +124,10 @@ pub fn on_operation_received(
                 .keys()
                 .filter(|&&op_id| node_info.known_op.insert(op_id)),
         );
-        send_batch(*node_id, batch)
+        if protocol.is_measured {
+            // just for the measurement, remove that on the definitive implementation
+            send_batch(*node_id, batch);
+        }
     }
 }
 
@@ -114,7 +138,7 @@ pub fn on_ask_received(
 ) {
     if let Some(node_info) = protocol.node_infos.get_mut(&node_id) {
         for op_ids in op_ids.iter() {
-            node_info.known_op.remove(&op_ids);
+            node_info.known_op.remove(op_ids);
         }
     }
     let mut operation_map = OperationMap::default();
@@ -123,7 +147,10 @@ pub fn on_ask_received(
             operation_map.insert(*op_id, op.clone());
         }
     }
-    send_operations(node_id, operation_map);
+    if protocol.is_measured {
+        // just for the measurement, remove that on the definitive implementation
+        send_operations(node_id, operation_map);
+    }
 }
 
 /// Take the op_batch_buffer and reprocess on batch received
@@ -132,11 +159,13 @@ pub fn on_send_loop(protocol: &mut FakeProtocol /* self simulation */) {
         && std::time::Instant::now() > protocol.op_batch_buffer.front().unwrap().0
     {
         let (_, node_id, op_batch) = protocol.op_batch_buffer.pop_front().unwrap();
-        on_batch_received(op_batch, node_id, protocol)
+        on_batch_received(op_batch, node_id, protocol);
     }
 }
 
 /// Should be done in a loop each `asked_life_time` period
-pub fn on_prune_asked_lifetime_loop(protocol: &mut FakeProtocol /* self simulation */) {
+///
+/// (let's don't prune for now, we will absolutly do that in the final implementation)
+pub fn _on_prune_asked_lifetime_loop(protocol: &mut FakeProtocol /* self simulation */) {
     protocol.wanted_alias_asked_ops.clear();
 }
